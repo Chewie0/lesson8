@@ -4,14 +4,14 @@
   become: yes
   tasks:
   - name: Git clone
-   ansible.builtin.git:
-     repo: https://github.com/koddas/war-web-project.git
-     dest: /test
+    ansible.builtin.git:
+      repo: https://github.com/koddas/war-web-project.git
+      dest: /test
   - name: maven
-   apt: 
-     name: maven 
-     state: psesent
+    apt: 
+      name: maven 
+      state: psesent
   - name: Running mvn clean
-     shell: "mvn  -f /test/pom.xml package"
-     register: mvn_result    
+    shell: "mvn  -f /test/pom.xml package"
+    register: mvn_result    
 
