@@ -1,21 +1,88 @@
 ---
- - name: Java app
-   hosts: dev
-   become: yes
 
-   tasks:
-     - name: Git clone
-       ansible.builtin.git:
-         repo: https://github.com/koddas/war-web-project.git
-         dest: /test
-     - name: maven install
-       apt: 
-         name: maven 
-         state: psesent
-     - name: Running mvn clean
-       ansible.builtin.shell:
-         cmd: "mvn -f pom.xml package"
-         chdir: test/
+- name: Install Apache Tomcat10 using ansible
+  hosts: webserver
+  remote_user: ubuntu
+  become: true
+  tasks:
+  - name: Create a Tomcat User
+    user:
+     name: tomcat
+
+  - name: Create a Tomcat Group
+    group:
+     name: tomcat
+
+  - name: Install JAVA
+    apt:
+     name: default-jdk
+     state: present
+
+
+  - name: Create a Tomcat Directory
+    file:
+     path: /opt/tomcat10
+     owner: tomcat
+     group: tomcat
+     mode: 755
+     recurse: yes
+
+  - name: download & unarchive tomcat10 
+    unarchive:
+     src: https://mirrors.estointernet.in/apache/tomcat/tomcat-10/v10.0.4/bin/apache-tomcat- 10.0.4.tar.gz
+     dest: /opt/tomcat10
+     remote_src: yes
+     extra_opts: [--strip-components=1]
+
+  - name: Change ownership of tomcat directory
+    file:
+     path: /opt/tomcat10
+     owner: tomcat
+     group: tomcat
+     mode: "u+rwx,g+rx,o=rx"
+     recurse: yes
+     state: directory
+
+  - name: Copy Tomcat service from local to remote
+    copy:
+     src: /etc/tomcat.service
+     dest: /etc/systemd/system/
+     mode: 0755
+
+  - name: Start and Enable Tomcat 10 on sever
+    systemd:
+     name: tomcat
+     state: started
+     daemon_reload: true
+
+
+
+- name: java app
+  hosts: dev
+  become: yes
+
+  tasks:
+  - name: maven install
+    apt: 
+     name: maven 
+     state: present
+  - name: git install
+    apt:
+     name: git
+     state: present 
+  - name: git clone 
+    git:
+     repo: https://github.com/koddas/war-web-project.git
+     dest: /test/           
+     clone: yes
+  - name: running maven
+    shell:
+     cmd: "mvn -f pom.xml package"
+     chdir: /test/
+  - name: copy war
+    copy: 
+     src: /test/target/wwp-1.0.0.war
+     dest: /usr/local/tomcat/webapps
            
 
 
