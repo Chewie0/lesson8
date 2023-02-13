@@ -11,7 +11,5 @@
     apt: 
       name: maven 
       state: psesent
-  - name: Running mvn clean
-    shell: "mvn  -f /test/pom.xml package"
-    register: mvn_result    
+  
 
